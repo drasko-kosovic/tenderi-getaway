@@ -59,10 +59,20 @@ export class SpecifikacijeComponent implements AfterViewInit, OnChanges, OnInit 
     private accountService: AccountService,
     protected dialog: MatDialog
   ) {}
+  loadAll(): void {
 
+
+    this.specifikacijaService.query().subscribe(
+      (res: HttpResponse<ISpecifikacije[]>) => {
+
+        this.dataSource.data = res.body ?? [];
+      }
+    );
+  }
   public getSifraPostupka(): void {
     this.specifikacijaService.findSiftraPostupak(this.postupak).subscribe((res: ISpecifikacije[]) => {
       this.dataSource.data = res;
+
     });
   }
   startEdit(
@@ -138,6 +148,8 @@ export class SpecifikacijeComponent implements AfterViewInit, OnChanges, OnInit 
 
   ngOnInit(): void {
     this.getSifraPostupka();
+    // this.loadAll();
+
   }
 
   uploadFile(): any {
