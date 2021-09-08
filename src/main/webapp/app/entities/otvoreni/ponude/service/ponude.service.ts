@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import * as dayjs from 'dayjs';
-
 import { isPresent } from 'app/core/util/operators';
-import { DATE_FORMAT } from 'app/config/input.constants';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 import { IPonude, getPonudeIdentifier } from '../ponude.model';
+import {SERVER_API_URL} from "app/app.constants";
 
 export type EntityResponseType = HttpResponse<IPonude>;
 export type EntityArrayResponseType = HttpResponse<IPonude[]>;
@@ -17,44 +14,60 @@ export type EntityArrayResponseType = HttpResponse<IPonude[]>;
 export class PonudeService {
   public resourceUrl = this.applicationConfigService.getEndpointFor('api/ponudes', 'otvoreni');
 
+  public urlDeleSeleced = this.applicationConfigService.getEndpointFor('api/ponude/delete/selected');
+  public urlUpdateSeleced = this.applicationConfigService.getEndpointFor('api/ponude/update/selected');
+  public resourceUrlSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude');
+  public resourceUrlPonudedSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude-sifra-ponude');
+  public resourceUrlExcelUpload = SERVER_API_URL + 'api/uploadfiles';
+  public resourceUrlSifraPonudeDelete = this.applicationConfigService.getEndpointFor('api/ponude');
+  public resourceUrlPostupakPonudeeUgovor = this.applicationConfigService.getEndpointFor('api/prvorangirani');
+  public resourceUrlPonudePonudjaci = this.applicationConfigService.getEndpointFor('api/ponudjaci_ponude');
+
   constructor(protected http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
+  findSiftraPostupak(sifra_postupka: number): any {
+    return this.http.get<IPonude[]>(`${this.resourceUrlSifraPonude}/${sifra_postupka}`);
+  }
+
+  findSiftraPonude(sifra_ponude: number): any {
+    return this.http.get<IPonude[]>(`${this.resourceUrlPonudedSifraPonude}/${sifra_ponude}`);
+  }
+
+  findSiftraPostupakPonudePonudjaci(sifra_postupka: number): any {
+    return this.http.get<IPonude[]>(`${this.resourceUrlPonudePonudjaci}/${sifra_postupka}`);
+  }
+
+  ponudeAll(): any {
+    return this.http.get<IPonude[]>(this.resourceUrl);
+  }
+
   create(ponude: IPonude): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ponude);
-    return this.http
-      .post<IPonude>(this.resourceUrl, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.post<IPonude>(this.resourceUrl, ponude, { observe: 'response' });
   }
 
   update(ponude: IPonude): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ponude);
-    return this.http
-      .put<IPonude>(`${this.resourceUrl}/${getPonudeIdentifier(ponude) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.put<IPonude>(`${this.resourceUrl}/${getPonudeIdentifier(ponude) as number}`, ponude, { observe: 'response' });
   }
 
   partialUpdate(ponude: IPonude): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ponude);
-    return this.http
-      .patch<IPonude>(`${this.resourceUrl}/${getPonudeIdentifier(ponude) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.patch<IPonude>(`${this.resourceUrl}/${getPonudeIdentifier(ponude) as number}`, ponude, { observe: 'response' });
   }
 
   find(id: number): Observable<EntityResponseType> {
-    return this.http
-      .get<IPonude>(`${this.resourceUrl}/${id}`, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.get<IPonude>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
-    return this.http
-      .get<IPonude[]>(this.resourceUrl, { params: options, observe: 'response' })
-      .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
+    return this.http.get<IPonude[]>(this.resourceUrl, { params: options, observe: 'response' });
   }
 
   delete(id: number): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  }
+
+  deleteSifraPonude(sifraPonude: number): any {
+    return this.http.delete(`${this.resourceUrlSifraPonudeDelete}/${sifraPonude}`);
   }
 
   addPonudeToCollectionIfMissing(ponudeCollection: IPonude[], ...ponudesToCheck: (IPonude | null | undefined)[]): IPonude[] {
@@ -74,25 +87,20 @@ export class PonudeService {
     return ponudeCollection;
   }
 
-  protected convertDateFromClient(ponude: IPonude): IPonude {
-    return Object.assign({}, ponude, {
-      datumPonude: ponude.datumPonude?.isValid() ? ponude.datumPonude.format(DATE_FORMAT) : undefined,
-    });
+  UploadExcel(formData: FormData): any {
+    const headers = new HttpHeaders();
+
+    headers.append('Content-Type', 'multipart/form-data');
+    headers.append('Accept', 'application/json');
+
+    return this.http.post(this.resourceUrlExcelUpload, formData, { headers });
   }
 
-  protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
-    if (res.body) {
-      res.body.datumPonude = res.body.datumPonude ? dayjs(res.body.datumPonude) : undefined;
-    }
-    return res;
+  updatePersonSelected(id: number): void {
+    this.http.put(`${this.urlUpdateSeleced}/${id}`, null).subscribe();
   }
 
-  protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
-    if (res.body) {
-      res.body.forEach((ponude: IPonude) => {
-        ponude.datumPonude = ponude.datumPonude ? dayjs(ponude.datumPonude) : undefined;
-      });
-    }
-    return res;
+  deleteSelected(): void {
+    this.http.delete(`${this.urlDeleSeleced}`).subscribe();
   }
 }

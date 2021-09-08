@@ -1,86 +1,205 @@
-<div>
-  <h2 id="page-heading" data-cy="PonudeHeading">
-    <span jhiTranslate="tenderiApp.otvoreniPonude.home.title">Ponudes</span>
+<button
+  *jhiHasAnyAuthority="'ROLE_ADMIN'"
+  id="jh-create-entity"
+  data-cy="entityCreateButton"
+  mat-raised-button
+  color="primary"
+  (click)="addNew()"
+>
+  <fa-icon icon="plus"></fa-icon>
+  <span>Nova Ponuda</span>
+</button>
+<mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+  <input hidden #fileInput type="file" id="file" />
+  <!--  <jhi-alert-error></jhi-alert-error>-->
+  <jhi-alert></jhi-alert>
+  <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" (click)="uploadFile()" matTooltip="Unesi Excel fajl">Dodaj Fajl</mat-button-toggle>
+  <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Napravi formu za unos Excel" (click)="DownloadExcel()"
+    >Napravi Obrazac</mat-button-toggle
+  >
 
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info mr-2" (click)="loadAll()" [disabled]="isLoading">
-        <fa-icon icon="sync" [spin]="isLoading"></fa-icon>
-        <span jhiTranslate="tenderiApp.otvoreniPonude.home.refreshListLabel">Refresh List</span>
-      </button>
+  <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Ukloni cijelu ponudu" (click)="open(content1)"
+    >Ukloni Ponudu</mat-button-toggle
+  >
+  <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Nadji Excel fajl" (click)="fileInput.click()"
+    >Nadji Fajl</mat-button-toggle
+  >
 
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-ponude"
-        [routerLink]="['/ponude/new']"
-      >
-        <fa-icon icon="plus"></fa-icon>
-        <span jhiTranslate="tenderiApp.otvoreniPonude.home.createLabel"> Create a new Ponude </span>
+  <mat-button-toggle
+    *jhiHasAnyAuthority="'ROLE_ADMIN'"
+    matTooltip=" Excel fajl"
+    (click)="exporter.exportTable('xlsx', { fileName: 'Ponude', sheet: 'sheet_name', Props: { Author: 'Talha' } })"
+    ><img src="../../../../content/images/icons8-microsoft-excel-48.png" alt=""
+  /></mat-button-toggle>
+</mat-button-toggle-group>
+
+<mat-form-field>
+  <mat-label>Ponudjaci</mat-label>
+  <mat-select (selectionChange)="getSifraPonude()" [(ngModel)]="nadjiPonudjaca">
+    <mat-option (click)="ngOnChanges()">Osvjezi</mat-option>
+    <mat-option *ngFor="let foo of ponude_ponudjaci" [value]="foo.sifraPonude">
+      {{ foo.nazivPonudjaca }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+<mat-form-field class="container-search">
+  <mat-icon matPrefix>search</mat-icon>
+  <input type="search" (keyup)="doFilter(box.value)" #box matInput placeholder="" />
+</mat-form-field>
+<div class="example-container mat-elevation-z8">
+  <table
+    class="example-container mat-elevation-z8"
+    mat-table
+    id="ExampleTable"
+    matTableExporter
+    [dataSource]="dataSource"
+    matSort
+    matSortStart="desc"
+    #exporter="matTableExporter"
+  >
+    <ng-container matColumnDef="sifra postupka">
+      <th mat-header-cell *matHeaderCellDef>Sifra Postupka</th>
+      <td mat-cell *matCellDef="let element">{{ element.sifraPostupka }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="sifraPonude">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Sifra Ponude</th>
+      <td mat-cell *matCellDef="let element">{{ element.sifraPonude }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="brojPartije">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Broj Partije</th>
+      <td mat-cell *matCellDef="let element">{{ element.brojPartije }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="sifra ponudjaca">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Sifra Ponudjaca</th>
+      <td mat-cell *matCellDef="let element">{{ element.sifraPonudjaca }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="naziv proizvodjaca">
+      <th mat-header-cell *matHeaderCellDef>Proizvodjac</th>
+      <td mat-cell *matCellDef="let element">{{ element.nazivProizvodjaca }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="zasticeni naziv">
+      <th mat-header-cell *matHeaderCellDef>Zasticeni Naziv</th>
+      <td mat-cell *matCellDef="let element">{{ element.zasticeniNaziv }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="ponudjena vrijednost">
+      <th mat-header-cell *matHeaderCellDef>Ponudjena Cijena</th>
+      <td mat-cell *matCellDef="let element">{{ element.ponudjenaVrijednost | number: '1.2-2' }}</td>
+      <td mat-footer-cell *matFooterCellDef>Ukupno: {{ getTotalCost() | number: '1.2-2' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="rok isporuke">
+      <th mat-header-cell *matHeaderCellDef>Rok Isporuke</th>
+      <td mat-cell *matCellDef="let element">{{ element.rokIsporuke }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="datum ponude">
+      <th mat-header-cell *matHeaderCellDef>Datum Ponude</th>
+      <td mat-cell *matCellDef="let element">{{ element.datumPonude }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="ponudjaci_id">
+      <th mat-header-cell *matHeaderCellDef>Ponudjaci Id</th>
+      <td mat-cell *matCellDef="let element">{{ element.ponudjaci_id }}</td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="edit" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon
+          *jhiHasAnyAuthority="'ROLE_ADMIN'"
+          id="edit"
+          (click)="
+            startEdit(
+              element.id,
+              element.sifraPostupka,
+              element.sifraPonude,
+              element.brojPartije,
+              element.sifraPonudjaca,
+              element.nazivProizvodjaca,
+              element.zasticeniNaziv,
+              element.ponudjenaVrijednost,
+              element.rokIsporuke,
+              element.datumPonude
+            )
+          "
+          >edit</mat-icon
+        >
+      </td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+
+    <ng-container matColumnDef="delete selected">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon style="background-color: red" *jhiHasAnyAuthority="'ROLE_ADMIN'" id="izabrano" type="submit" (click)="delete(element)"
+          >delete_forever</mat-icon
+        >
+      </td>
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <button
+          mat-raised-button
+          color="warn"
+          type="button"
+          matTooltip="Obrisi izabrane pozicije"
+          *jhiHasAnyAuthority="'ROLE_ADMIN'"
+          id="delete-selected"
+          (click)="open(content)"
+        ></button>
+      </th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        <section class="example-section">
+          <mat-checkbox *jhiHasAnyAuthority="'ROLE_ADMIN'" class="example-margin" (click)="updateSelected(element.id)"></mat-checkbox>
+        </section>
+      </td>
+
+      <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container>
+    <tr class="heder" mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+  </table>
+  <!--  <mat-paginator [pageSizeOptions]="[10, 20]" showFirstLastButtons></mat-paginator>-->
+  <!--  </mat-card>-->
+
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Brisanje</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
       </button>
     </div>
-  </h2>
+    <div class="modal-body">
+      <h4>Dali ste sigurni da zeliet izbrisete selektovane partije</h4>
+    </div>
+    <div class="modal-footer">
+      <button mat-raised-button color="primary" (click)="modal.close('Save click')">NE</button>
+      <button mat-raised-button color="warn" (click)="deleteSelected()" (click)="modal.close('Save click')">DA</button>
+    </div>
+  </ng-template>
 
-  <jhi-alert-error></jhi-alert-error>
+  <ng-template #content1 let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">Brisanje</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <h4>Dali ste sigurni da zelite izbrisete cijelu ponude</h4>
+    </div>
+    <div class="modal-footer">
+      <button mat-raised-button color="primary" (click)="modal.close('Save click')">NE</button>
+      <button mat-raised-button color="warn" (click)="deleteSifra()" (click)="modal.close('Save click')">DA</button>
+    </div>
+  </ng-template>
 
-  <jhi-alert></jhi-alert>
-
-  <div class="alert alert-warning" id="no-result" *ngIf="ponudes?.length === 0">
-    <span jhiTranslate="tenderiApp.otvoreniPonude.home.notFound">No ponudes found</span>
-  </div>
-
-  <div class="table-responsive" id="entities" *ngIf="ponudes && ponudes.length > 0">
-    <table class="table table-striped" aria-describedby="page-heading">
-      <thead>
-        <tr>
-          <th scope="col"><span jhiTranslate="global.field.id">ID</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.sifraPonude">Sifra Ponude</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.sifraPostupka">Sifra Postupka</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.brojPartije">Broj Partije</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.nazivProizvodjaca">Naziv Proizvodjaca</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.zasticeniNaziv">Zasticeni Naziv</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.ponudjenaVrijednost">Ponudjena Vrijednost</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.rokIsporuke">Rok Isporuke</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.datumPonude">Datum Ponude</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.sifraPonudjaca">Sifra Ponudjaca</span></th>
-          <th scope="col"><span jhiTranslate="tenderiApp.otvoreniPonude.selected">Selected</span></th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let ponude of ponudes; trackBy: trackId" data-cy="entityTable">
-          <td>
-            <a [routerLink]="['/ponude', ponude.id, 'view']">{{ ponude.id }}</a>
-          </td>
-          <td>{{ ponude.sifraPonude }}</td>
-          <td>{{ ponude.sifraPostupka }}</td>
-          <td>{{ ponude.brojPartije }}</td>
-          <td>{{ ponude.nazivProizvodjaca }}</td>
-          <td>{{ ponude.zasticeniNaziv }}</td>
-          <td>{{ ponude.ponudjenaVrijednost }}</td>
-          <td>{{ ponude.rokIsporuke }}</td>
-          <td>{{ ponude.datumPonude | formatMediumDate }}</td>
-          <td>{{ ponude.sifraPonudjaca }}</td>
-          <td>{{ ponude.selected }}</td>
-          <td class="text-right">
-            <div class="btn-group">
-              <button type="submit" [routerLink]="['/ponude', ponude.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
-                <fa-icon icon="eye"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
-              </button>
-
-              <button type="submit" [routerLink]="['/ponude', ponude.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
-                <fa-icon icon="pencil-alt"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
-              </button>
-
-              <button type="submit" (click)="delete(ponude)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
-                <fa-icon icon="times"></fa-icon>
-                <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <hr />
 </div>

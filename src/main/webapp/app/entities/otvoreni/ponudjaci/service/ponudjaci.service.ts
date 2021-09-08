@@ -41,10 +41,16 @@ export class PonudjaciService {
     return this.http.get<IPonudjaci[]>(this.resourceUrl, { params: options, observe: 'response' });
   }
 
+  query1(): Observable<IPonudjaci[]> {
+    return this.http.get<IPonudjaci[]>(this.resourceUrl);
+  }
+
   delete(id: number): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
-
+  ponudjaciAll(): any {
+    return this.http.get<IPonudjaci[]>(this.resourceUrl);
+  }
   addPonudjaciToCollectionIfMissing(
     ponudjaciCollection: IPonudjaci[],
     ...ponudjacisToCheck: (IPonudjaci | null | undefined)[]
