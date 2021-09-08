@@ -1,25 +1,18 @@
-<button
-  *jhiHasAnyAuthority="'ROLE_ADMIN'"
-  id="jh-create-entity"
-  data-cy="entityCreateButton"
-  mat-raised-button
-  color="primary"
-  (click)="addNew()"
->
-  <fa-icon icon="plus"></fa-icon>
-  <span>Nova Ponuda</span>
-</button>
+
 <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
   <input hidden #fileInput type="file" id="file" />
   <!--  <jhi-alert-error></jhi-alert-error>-->
   <jhi-alert></jhi-alert>
+  <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Dodaj ponudu"  (click)="addNew()"
+  >Nova Ponuda</mat-button-toggle>
+
   <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" (click)="uploadFile()" matTooltip="Unesi Excel fajl">Dodaj Fajl</mat-button-toggle>
   <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Napravi formu za unos Excel" (click)="DownloadExcel()"
-    >Napravi Obrazac</mat-button-toggle
+    >Napravi Obrazac</mat-button-toggle>
   >
 
   <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Ukloni cijelu ponudu" (click)="open(content1)"
-    >Ukloni Ponudu</mat-button-toggle
+    >Ukloni Ponudu</mat-button-toggle>
   >
   <mat-button-toggle *jhiHasAnyAuthority="'ROLE_ADMIN'" matTooltip="Nadji Excel fajl" (click)="fileInput.click()"
     >Nadji Fajl</mat-button-toggle
