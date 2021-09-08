@@ -1,66 +1,86 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-
 import { ISpecifikacije, Specifikacije } from '../specifikacije.model';
 import { SpecifikacijeService } from '../service/specifikacije.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'jhi-specifikacije-update',
   templateUrl: './specifikacije-update.component.html',
+  styleUrls: ['./specifikacije-update.scss'],
 })
-export class SpecifikacijeUpdateComponent implements OnInit {
+export class SpecifikacijeUpdateComponent {
   isSaving = false;
+  editForm: FormGroup;
+  aktivno: boolean;
 
-  editForm = this.fb.group({
-    id: [],
-    sifraPostupka: [null, [Validators.required]],
-    brojPartije: [null, [Validators.required]],
-    atc: [],
-    inn: [],
-    farmaceutskiOblikLijeka: [],
-    jacinaLijeka: [],
-    jedinicaMjere: [],
-    procijenjenaVrijednost: [],
-    pakovanje: [],
-    trazenaKolicina: [],
-  });
-
-  constructor(protected specifikacijeService: SpecifikacijeService, protected activatedRoute: ActivatedRoute, protected fb: FormBuilder) {}
-
-  ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ specifikacije }) => {
-      this.updateForm(specifikacije);
+  constructor(
+    protected specifikacijeService: SpecifikacijeService,
+    protected activatedRoute: ActivatedRoute,
+    protected fb: FormBuilder,
+    private router: Router,
+    private dialogRef: MatDialogRef<SpecifikacijeUpdateComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    {
+      id,
+      sifraPostupka,
+      brojPartije,
+      atc,
+      inn,
+      farmaceutskiOblikLijeka,
+      jacinaLijeka,
+      trazenaKolicina,
+      pakovanje,
+      jedinicaMjere,
+      procijenjenaVrijednost,
+      name,
+    }: any
+  ) {
+    this.editForm = this.fb.group({
+      id: [id],
+      sifraPostupka: [sifraPostupka, [Validators.required]],
+      brojPartije: [brojPartije, [Validators.required]],
+      atc: [atc],
+      inn: [inn],
+      farmaceutskiOblikLijeka: [farmaceutskiOblikLijeka],
+      jacinaLijeka: [jacinaLijeka],
+      trazenaKolicina: [trazenaKolicina, [Validators.required]],
+      pakovanje: [pakovanje],
+      jedinicaMjere: [jedinicaMjere],
+      procijenjenaVrijednost: [procijenjenaVrijednost, [Validators.required]],
     });
+    this.aktivno = name;
   }
-
-  previousState(): void {
-    window.history.back();
+  close(): any {
+    this.dialogRef.close();
+  }
+  public confirmAdd(): void {
+    const specifikacije = this.createFromForm();
+    this.subscribeToSaveResponse(this.specifikacijeService.create(specifikacije));
+    this.dialogRef.close();
   }
 
   save(): void {
     this.isSaving = true;
     const specifikacije = this.createFromForm();
-    if (specifikacije.id !== undefined) {
-      this.subscribeToSaveResponse(this.specifikacijeService.update(specifikacije));
-    } else {
-      this.subscribeToSaveResponse(this.specifikacijeService.create(specifikacije));
-    }
+
+    this.subscribeToSaveResponse(this.specifikacijeService.update(specifikacije));
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<ISpecifikacije>>): void {
     result.pipe(finalize(() => this.onSaveFinalize())).subscribe(
-      () => this.onSaveSuccess(),
+      // () => this.onSaveSuccess(),
       () => this.onSaveError()
     );
   }
 
-  protected onSaveSuccess(): void {
-    this.previousState();
-  }
+  // protected onSaveSuccess(): void {
+  //   this.previousState();
+  // }
 
   protected onSaveError(): void {
     // Api for inheritance.
@@ -68,22 +88,6 @@ export class SpecifikacijeUpdateComponent implements OnInit {
 
   protected onSaveFinalize(): void {
     this.isSaving = false;
-  }
-
-  protected updateForm(specifikacije: ISpecifikacije): void {
-    this.editForm.patchValue({
-      id: specifikacije.id,
-      sifraPostupka: specifikacije.sifraPostupka,
-      brojPartije: specifikacije.brojPartije,
-      atc: specifikacije.atc,
-      inn: specifikacije.inn,
-      farmaceutskiOblikLijeka: specifikacije.farmaceutskiOblikLijeka,
-      jacinaLijeka: specifikacije.jacinaLijeka,
-      jedinicaMjere: specifikacije.jedinicaMjere,
-      procijenjenaVrijednost: specifikacije.procijenjenaVrijednost,
-      pakovanje: specifikacije.pakovanje,
-      trazenaKolicina: specifikacije.trazenaKolicina,
-    });
   }
 
   protected createFromForm(): ISpecifikacije {
@@ -96,10 +100,10 @@ export class SpecifikacijeUpdateComponent implements OnInit {
       inn: this.editForm.get(['inn'])!.value,
       farmaceutskiOblikLijeka: this.editForm.get(['farmaceutskiOblikLijeka'])!.value,
       jacinaLijeka: this.editForm.get(['jacinaLijeka'])!.value,
+      trazenaKolicina: this.editForm.get(['trazenaKolicina'])!.value,
+      pakovanje: this.editForm.get(['pakovanje'])!.value,
       jedinicaMjere: this.editForm.get(['jedinicaMjere'])!.value,
       procijenjenaVrijednost: this.editForm.get(['procijenjenaVrijednost'])!.value,
-      pakovanje: this.editForm.get(['pakovanje'])!.value,
-      trazenaKolicina: this.editForm.get(['trazenaKolicina'])!.value,
     };
   }
 }

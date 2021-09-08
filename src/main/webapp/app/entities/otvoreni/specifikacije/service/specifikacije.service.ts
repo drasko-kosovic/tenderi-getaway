@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { isPresent } from 'app/core/util/operators';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 import { ISpecifikacije, getSpecifikacijeIdentifier } from '../specifikacije.model';
+import {SERVER_API_URL} from "app/app.constants";
+import {IPostupci} from "app/entities/otvoreni/postupci/postupci.model";
 
 export type EntityResponseType = HttpResponse<ISpecifikacije>;
 export type EntityArrayResponseType = HttpResponse<ISpecifikacije[]>;
@@ -13,21 +15,20 @@ export type EntityArrayResponseType = HttpResponse<ISpecifikacije[]>;
 @Injectable({ providedIn: 'root' })
 export class SpecifikacijeService {
   public resourceUrl = this.applicationConfigService.getEndpointFor('api/specifikacijes', 'otvoreni');
-
+  public resourceUrlSifraPostupka = this.applicationConfigService.getEndpointFor('api/specifikacija');
+  public resourceUrlExcelUpload = SERVER_API_URL + 'api/uploadfiles/specifikacije';
   constructor(protected http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
+
+  findSiftraPostupak(sifra_postupka: number): any {
+    return this.http.get<IPostupci[]>(`${this.resourceUrlSifraPostupka}/${sifra_postupka}`);
+  }
   create(specifikacije: ISpecifikacije): Observable<EntityResponseType> {
     return this.http.post<ISpecifikacije>(this.resourceUrl, specifikacije, { observe: 'response' });
   }
 
   update(specifikacije: ISpecifikacije): Observable<EntityResponseType> {
     return this.http.put<ISpecifikacije>(`${this.resourceUrl}/${getSpecifikacijeIdentifier(specifikacije) as number}`, specifikacije, {
-      observe: 'response',
-    });
-  }
-
-  partialUpdate(specifikacije: ISpecifikacije): Observable<EntityResponseType> {
-    return this.http.patch<ISpecifikacije>(`${this.resourceUrl}/${getSpecifikacijeIdentifier(specifikacije) as number}`, specifikacije, {
       observe: 'response',
     });
   }
@@ -45,25 +46,12 @@ export class SpecifikacijeService {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
-  addSpecifikacijeToCollectionIfMissing(
-    specifikacijeCollection: ISpecifikacije[],
-    ...specifikacijesToCheck: (ISpecifikacije | null | undefined)[]
-  ): ISpecifikacije[] {
-    const specifikacijes: ISpecifikacije[] = specifikacijesToCheck.filter(isPresent);
-    if (specifikacijes.length > 0) {
-      const specifikacijeCollectionIdentifiers = specifikacijeCollection.map(
-        specifikacijeItem => getSpecifikacijeIdentifier(specifikacijeItem)!
-      );
-      const specifikacijesToAdd = specifikacijes.filter(specifikacijeItem => {
-        const specifikacijeIdentifier = getSpecifikacijeIdentifier(specifikacijeItem);
-        if (specifikacijeIdentifier == null || specifikacijeCollectionIdentifiers.includes(specifikacijeIdentifier)) {
-          return false;
-        }
-        specifikacijeCollectionIdentifiers.push(specifikacijeIdentifier);
-        return true;
-      });
-      return [...specifikacijesToAdd, ...specifikacijeCollection];
-    }
-    return specifikacijeCollection;
+  UploadExcel(formData: FormData): any {
+    const headers = new HttpHeaders();
+
+    headers.append('Content-Type', 'multipart/form-data');
+    headers.append('Accept', 'application/json');
+
+    return this.http.post(this.resourceUrlExcelUpload, formData, { headers });
   }
 }

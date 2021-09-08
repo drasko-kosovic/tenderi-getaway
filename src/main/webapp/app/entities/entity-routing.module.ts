@@ -39,6 +39,12 @@ import { RouterModule } from '@angular/router';
         data: { pageTitle: 'tenderiApp.otvoreniAnex.home.title' },
         loadChildren: () => import('./otvoreni/anex/anex.module').then(m => m.OtvoreniAnexModule),
       },
+      {
+        path: 'tenderi-home',
+        data: { pageTitle: 'tenderiApp.tenderiHome.home.title' },
+        loadChildren: () => import('./otvoreni/tenderi-home/tenderi-home.module').then(m => m.TenderiHomeModule),
+      }
+
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ]),
   ],
