@@ -42,6 +42,9 @@
     "jwtSecretKey": "Y2RkZDYwMDgzNDBmNTE4ZTk2YzIzOTNmNzAwNmI2YzRiZjY2OWE1Mjk4NDNiMjlhOWQ4ZDFmZDg0YzZhMThiN2U4MTBjODY0NzBhMGE5M2VkZmU2NmUwYzNiMzI1NzQ0MzQ5ODUzMWE1YjEwMzFiMGM0ODFhNmZjMDU2NjYxMmU=",
     "clientPackageManager": "npm",
     "languages": ["sr", "en"],
-    "entities": ["Ponude", "Postupci", "Ponudjaci", "Narucilac", "Ugovor", "Specifikacije", "Anex"]
+    "entities": ["Ponude", "Postupci", "Ponudjaci", "Narucilac", "Ugovor", "Specifikacije", "Anex", "ViewPonude"],
+    "herokuAppName": "tenderi-micro-getaway",
+    "herokuDeployType": "git",
+    "herokuJavaVersion": "11"
   }
 }

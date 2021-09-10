@@ -40,9 +40,19 @@ import { RouterModule } from '@angular/router';
         loadChildren: () => import('./otvoreni/anex/anex.module').then(m => m.OtvoreniAnexModule),
       },
       {
+        path: 'view-ponude',
+        data: { pageTitle: 'tenderiApp.otvoreniview-ponude.home.title' },
+        loadChildren: () => import('./otvoreni/view-ponude/view-ponude.module').then(m => m.OtvoreniViewPonudeModule),
+      },
+      {
         path: 'tenderi-home',
         data: { pageTitle: 'tenderiApp.tenderiHome.home.title' },
         loadChildren: () => import('./otvoreni/tenderi-home/tenderi-home.module').then(m => m.TenderiHomeModule),
+      },
+      {
+        path: 'view-ponude',
+        data: { pageTitle: 'tenderiApp.otvoreniViewPonude.home.title' },
+        loadChildren: () => import('./otvoreni/view-ponude/view-ponude.module').then(m => m.OtvoreniViewPonudeModule),
       },
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ]),
