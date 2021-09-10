@@ -6,6 +6,9 @@ import { TenderiHomeRoutingModule } from './route/tenderi-home-routing.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import {JhMaterialModule} from "app/shared/jh-material.module";
 import {OtvoreniSpecifikacijeModule} from "app/entities/otvoreni/specifikacije/specifikacije.module";
+
+import {OtvoreniViewVrednovanjeModule} from "app/entities/otvoreni/view-vrednovanje/view-vrednovanje.module";
+import {OtvoreniViewPrvorangiraniModule} from "app/entities/otvoreni/view-prvorangirani/view-prvorangirani.module";
 import {OtvoreniViewPonudeModule} from "app/entities/otvoreni/view-ponude/view-ponude.module";
 
 @NgModule({
@@ -16,6 +19,8 @@ import {OtvoreniViewPonudeModule} from "app/entities/otvoreni/view-ponude/view-p
         JhMaterialModule,
         OtvoreniSpecifikacijeModule,
         OtvoreniViewPonudeModule,
+        OtvoreniViewVrednovanjeModule,
+      OtvoreniViewPrvorangiraniModule,
 
     ],
   declarations: [TenderiHomeComponent],

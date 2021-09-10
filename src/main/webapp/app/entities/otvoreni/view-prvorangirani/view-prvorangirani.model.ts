@@ -1,4 +1,4 @@
-export interface IViewVrednovanje {
+export interface IViewPrvorangirani {
   id?: number;
   sifraPostupka?: number | null;
   sifraPonude?: number | null;
@@ -14,13 +14,13 @@ export interface IViewVrednovanje {
   ponudjenaVrijednost?: number | null;
   rokIsporuke?: number | null;
   nazivProizvodjaca?: string | null;
+  nazivPonudjaca?: string | null;
   bodCijena?: number | null;
   bodRok?: number | null;
   bodUkupno?: number | null;
-  ponudjaci?: number;
 }
 
-export class ViewVrednovanje implements IViewVrednovanje {
+export class ViewPrvorangirani implements IViewPrvorangirani {
   constructor(
     public id?: number,
     public sifraPostupka?: number | null,
@@ -37,13 +37,13 @@ export class ViewVrednovanje implements IViewVrednovanje {
     public ponudjenaVrijednost?: number | null,
     public rokIsporuke?: number | null,
     public nazivProizvodjaca?: string | null,
+    public nazivPonudjaca?: string | null,
     public bodCijena?: number | null,
     public bodRok?: number | null,
-    public bodUkupno?: number | null,
-    public ponudjaci?: number
+    public bodUkupno?: number | null
   ) {}
 }
 
-export function getViewVrednovanjeIdentifier(viewVrednovanje: IViewVrednovanje): number | undefined {
-  return viewVrednovanje.id;
+export function getViewPrvorangiraniIdentifier(viewPrvorangirani: IViewPrvorangirani): number | undefined {
+  return viewPrvorangirani.id;
 }
