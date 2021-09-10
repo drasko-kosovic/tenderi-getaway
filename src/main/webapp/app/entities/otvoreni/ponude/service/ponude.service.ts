@@ -14,14 +14,14 @@ export type EntityArrayResponseType = HttpResponse<IPonude[]>;
 export class PonudeService {
   public resourceUrl = this.applicationConfigService.getEndpointFor('api/ponudes', 'otvoreni');
 
-  public urlDeleSeleced = this.applicationConfigService.getEndpointFor('api/ponude/delete/selected');
-  public urlUpdateSeleced = this.applicationConfigService.getEndpointFor('api/ponude/update/selected');
-  public resourceUrlSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude');
-  public resourceUrlPonudedSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude-sifra-ponude');
+  public urlDeleSeleced = this.applicationConfigService.getEndpointFor('api/ponude/delete/selected', 'otvoreni');
+  public urlUpdateSeleced = this.applicationConfigService.getEndpointFor('api/ponude/update/selected', 'otvoreni');
+  public resourceUrlSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude', 'otvoreni');
+  public resourceUrlPonudedSifraPonude = this.applicationConfigService.getEndpointFor('api/ponude-sifra-ponude', 'otvoreni');
   public resourceUrlExcelUpload = SERVER_API_URL + 'api/uploadfiles';
-  public resourceUrlSifraPonudeDelete = this.applicationConfigService.getEndpointFor('api/ponude');
-  public resourceUrlPostupakPonudeeUgovor = this.applicationConfigService.getEndpointFor('api/prvorangirani');
-  public resourceUrlPonudePonudjaci = this.applicationConfigService.getEndpointFor('api/ponudjaci_ponude');
+  public resourceUrlSifraPonudeDelete = this.applicationConfigService.getEndpointFor('api/ponude', 'otvoreni');
+  public resourceUrlPostupakPonudeeUgovor = this.applicationConfigService.getEndpointFor('api/prvorangirani', 'otvoreni');
+  public resourceUrlPonudePonudjaci = this.applicationConfigService.getEndpointFor('api/ponudjaci_ponude', 'otvoreni');
 
   constructor(protected http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
