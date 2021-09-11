@@ -2,7 +2,7 @@
   <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
     <span class="logo-img"></span>
     <span jhiTranslate="global.title" class="navbar-title">Tenderi</span>
-    <span class="navbar-version">{{ version }}</span>
+    <!--    <span class="navbar-version">{{ version }}</span>-->
   </a>
   <a
     class="navbar-toggler d-lg-none"
@@ -16,13 +16,13 @@
   >
     <fa-icon icon="bars"></fa-icon>
   </a>
-  <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed" [ngSwitch]="isAuthenticated()">
+  <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed" [ngSwitch]="account !== null">
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
+      <li *ngSwitchCase="true" class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <a class="nav-link" routerLink="postupci" (click)="collapseNavbar()">
           <span>
             <fa-icon icon="home"></fa-icon>
-            <span jhiTranslate="global.menu.home">Home</span>
+            <span jhiTranslate="tenderiApp.postupci.detail.process">Process</span>
           </span>
         </a>
       </li>
@@ -45,37 +45,13 @@
           <li>
             <a
               class="dropdown-item"
-              routerLink="ponude"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniPonude">Ponude</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="postupci"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniPostupci">Postupci</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
               routerLink="ponudjaci"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
               (click)="collapseNavbar()"
             >
               <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniPonudjaci">Ponudjaci</span>
+              <span jhiTranslate="nav-bar.offers">Offers</span>
             </a>
           </li>
           <li>
@@ -87,95 +63,11 @@
               (click)="collapseNavbar()"
             >
               <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniNarucilac">Narucilac</span>
+              <span jhiTranslate="nav-bar.orderer">Orderer</span>
             </a>
           </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="ugovor"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniUgovor">Ugovor</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="specifikacije"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniSpecifikacije">Specifikacije</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="anex"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniAnex">Anex</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="view-ponude"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniViewPonude">View Ponude</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="hvale-ponude"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniHvalePonude">Hvale Ponude</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="view-vrednovanje"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniViewVrednovanje">View Vrednovanje</span>
-            </a>
-          </li>
-          <li>
-            <a
-              class="dropdown-item"
-              routerLink="view-prvorangirani"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="collapseNavbar()"
-            >
-              <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.entities.otvoreniViewPrvorangirani">View Prvorangirani</span>
-            </a>
-          </li>
-          <!-- jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here -->
         </ul>
+        <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="entity-menu"></ul>
       </li>
       <li
         *jhiHasAnyAuthority="'ROLE_ADMIN'"
@@ -193,39 +85,9 @@
         </a>
         <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="admin-menu">
           <li>
-            <a class="dropdown-item" routerLink="admin/gateway" routerLinkActive="active" (click)="collapseNavbar()">
-              <fa-icon icon="road" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.gateway">Gateway</span>
-            </a>
-          </li>
-          <li>
             <a class="dropdown-item" routerLink="admin/user-management" routerLinkActive="active" (click)="collapseNavbar()">
               <fa-icon icon="users" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.admin.userManagement">User management</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" routerLink="admin/metrics" routerLinkActive="active" (click)="collapseNavbar()">
-              <fa-icon icon="tachometer-alt" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.metrics">Metrics</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" routerLink="admin/health" routerLinkActive="active" (click)="collapseNavbar()">
-              <fa-icon icon="heart" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.health">Health</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" routerLink="admin/configuration" routerLinkActive="active" (click)="collapseNavbar()">
-              <fa-icon icon="cogs" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.configuration">Configuration</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" routerLink="admin/logs" routerLinkActive="active" (click)="collapseNavbar()">
-              <fa-icon icon="tasks" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.logs">Logs</span>
             </a>
           </li>
           <li *ngIf="openAPIEnabled">
@@ -235,12 +97,6 @@
             </a>
           </li>
           <!-- jhipster-needle-add-element-to-admin-menu - JHipster will add entities to the admin menu here -->
-          <li *ngIf="!inProduction">
-            <a class="dropdown-item" href=" http://localhost:8092/ " target="_tab" (click)="collapseNavbar()">
-              <fa-icon icon="database" [fixedWidth]="true"></fa-icon>
-              <span jhiTranslate="global.menu.admin.database">Database</span>
-            </a>
-          </li>
         </ul>
       </li>
       <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" *ngIf="languages && languages.length > 1">
@@ -257,7 +113,7 @@
               [jhiActiveMenu]="language"
               href="javascript:void(0);"
               (click)="changeLanguage(language); collapseNavbar()"
-              >{{ language | findLanguageFromKey }}</a
+            >{{ language | findLanguageFromKey }}</a
             >
           </li>
         </ul>
@@ -270,12 +126,12 @@
         [routerLinkActiveOptions]="{ exact: true }"
       >
         <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="account-menu" data-cy="accountMenu">
-          <span *ngIf="!getImageUrl()">
+          <span *ngIf="!account?.imageUrl">
             <fa-icon icon="user"></fa-icon>
             <span jhiTranslate="global.menu.account.main">Account</span>
           </span>
-          <span *ngIf="getImageUrl()">
-            <img [src]="getImageUrl()" class="profile-image rounded-circle" alt="Avatar" />
+          <span *ngIf="account?.imageUrl">
+            <img [src]="account!.imageUrl" class="profile-image rounded-circle" alt="Avatar" />
           </span>
         </a>
         <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="account-menu">
