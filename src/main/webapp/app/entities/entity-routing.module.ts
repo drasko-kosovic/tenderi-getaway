@@ -59,6 +59,11 @@ import { RouterModule } from '@angular/router';
         data: { pageTitle: 'tenderiApp.prvorangirani.home.title' },
         loadChildren: () => import('./otvoreni/view-prvorangirani/view-prvorangirani.module').then(m => m.OtvoreniViewPrvorangiraniModule),
       },
+      {
+        path: 'hvale-ponude',
+        data: { pageTitle: 'tenderiApp.hvale-ponudei.home.title' },
+        loadChildren: () => import('./otvoreni/hvale-ponude/hvale-ponude.module').then(m => m.OtvoreniHvalePonudeModule),
+      },
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ]),
   ],

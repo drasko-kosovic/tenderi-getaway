@@ -10,6 +10,7 @@ import {OtvoreniSpecifikacijeModule} from "app/entities/otvoreni/specifikacije/s
 import {OtvoreniViewVrednovanjeModule} from "app/entities/otvoreni/view-vrednovanje/view-vrednovanje.module";
 import {OtvoreniViewPrvorangiraniModule} from "app/entities/otvoreni/view-prvorangirani/view-prvorangirani.module";
 import {OtvoreniViewPonudeModule} from "app/entities/otvoreni/view-ponude/view-ponude.module";
+import {OtvoreniHvalePonudeModule} from "app/entities/otvoreni/hvale-ponude/hvale-ponude.module";
 
 @NgModule({
     imports: [
@@ -20,7 +21,8 @@ import {OtvoreniViewPonudeModule} from "app/entities/otvoreni/view-ponude/view-p
         OtvoreniSpecifikacijeModule,
         OtvoreniViewPonudeModule,
         OtvoreniViewVrednovanjeModule,
-      OtvoreniViewPrvorangiraniModule,
+        OtvoreniViewPrvorangiraniModule,
+        OtvoreniHvalePonudeModule,
 
     ],
   declarations: [TenderiHomeComponent],

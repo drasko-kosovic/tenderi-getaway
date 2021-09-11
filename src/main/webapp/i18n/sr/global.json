@@ -15,6 +15,9 @@
         "otvoreniSpecifikacije": "Specifikacije",
         "otvoreniAnex": "Anex",
         "otvoreniViewPonude": "View Ponude",
+        "otvoreniHvalePonude": "Hvale Ponude",
+        "otvoreniViewVrednovanje": "View Vrednovanje",
+        "otvoreniViewPrvorangirani": "View Prvorangirani",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {
