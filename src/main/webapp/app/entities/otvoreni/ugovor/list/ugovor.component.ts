@@ -1,117 +1,135 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpHeaders, HttpResponse } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { IUgovor } from '../ugovor.model';
-
-import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 import { UgovorService } from '../service/ugovor.service';
 import { UgovorDeleteDialogComponent } from '../delete/ugovor-delete-dialog.component';
+import { Account } from 'app/core/auth/account.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { AccountService } from 'app/core/auth/account.service';
+import { MatDialog } from '@angular/material/dialog';
+
+import { HttpResponse } from '@angular/common/http';
+import { Data } from '@angular/router';
+import {UgovorUpdateComponent} from "app/entities/otvoreni/ugovor/update/ugovor-update.component";
 
 @Component({
   selector: 'jhi-ugovor',
   templateUrl: './ugovor.component.html',
+  styleUrls: ['./ugovor.scss'],
 })
-export class UgovorComponent implements OnInit {
-  ugovors?: IUgovor[];
-  isLoading = false;
-  totalItems = 0;
-  itemsPerPage = ITEMS_PER_PAGE;
-  page?: number;
-  predicate!: string;
-  ascending!: boolean;
-  ngbPaginationPage = 1;
+export class UgovorComponent implements AfterViewInit, OnChanges, OnInit {
+  ugovor?: HttpResponse<IUgovor[]>;
+  account: Account | null = null;
+  aktivno?: boolean;
+  public displayedColumns = [
+    'sifra postupka',
+    'sifra ponude',
+    'broj ugovora',
+    'datum ugovora',
+    'broj odluke',
+    'datum odluke',
+    'iznos ugovora',
 
+    'delete',
+    'edit',
+    'print',
+    'print-prvorangirani',
+  ];
+
+  public dataSource = new MatTableDataSource<IUgovor>();
+
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @Input() postupak?: any;
   constructor(
     protected ugovorService: UgovorService,
-    protected activatedRoute: ActivatedRoute,
-    protected router: Router,
-    protected modalService: NgbModal
+    protected modalService: NgbModal,
+    private accountService: AccountService,
+    protected dialog: MatDialog
   ) {}
 
-  loadPage(page?: number, dontNavigate?: boolean): void {
-    this.isLoading = true;
-    const pageToLoad: number = page ?? this.page ?? 1;
+  public getSifraPostupka(): void {
+    this.ugovorService.findSiftraPostupak(this.postupak).subscribe((res: IUgovor[]) => {
+      this.dataSource.data = res;
+    });
+  }
+  startEdit(
+    id?: number,
+    sifraPostupka?: number,
+    sifraPonude?: number,
+    sifraPonudjaca?: number,
+    iznosUgovoraBezPdf?: number,
+    brojUgovora?: string,
+    brojOdluke?: string,
+    datumOdluke?: Data,
+    datumUgovora?: Data
+  ): any {
+    const dialogRef = this.dialog.open(UgovorUpdateComponent, {
+      data: {
+        id,
+        sifraPostupka,
+        sifraPonude,
+        sifraPonudjaca,
+        iznosUgovoraBezPdf,
+        brojUgovora,
+        brojOdluke,
+        datumOdluke,
+        datumUgovora,
+        name: (this.aktivno = true),
+      },
+    });
+    dialogRef.afterClosed().subscribe(() => this.getSifraPostupka());
+  }
+  addNew(): any {
+    const dialogRef = this.dialog.open(UgovorUpdateComponent, {
+      data: { Ugovor: {}, name: (this.aktivno = false) },
+    });
+    dialogRef.afterClosed().subscribe(() => this.getSifraPostupka());
+  }
+  delete(ugovor: IUgovor[]): void {
+    const modalRef = this.modalService.open(UgovorDeleteDialogComponent, { backdrop: 'static' });
+    modalRef.componentInstance.ugovor = ugovor;
+    modalRef.closed.subscribe((reason: string) => {
+      if (reason === 'deleted') {
+        this.getSifraPostupka();
+      }
+    });
+  }
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
+  }
 
-    this.ugovorService
-      .query({
-        page: pageToLoad - 1,
-        size: this.itemsPerPage,
-        sort: this.sort(),
-      })
-      .subscribe(
-        (res: HttpResponse<IUgovor[]>) => {
-          this.isLoading = false;
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-        },
-        () => {
-          this.isLoading = false;
-          this.onError();
-        }
-      );
+  ngOnChanges(): void {
+    this.getSifraPostupka();
+  }
+  isAuthenticated(): boolean {
+    return this.accountService.isAuthenticated();
   }
 
   ngOnInit(): void {
-    this.handleNavigation();
+    this.getSifraPostupka();
+  }
+  getPrvorangiraniPonude(sifraPostupka: number, sifraPonude: number): any {
+    this.ugovorService.getPrvorangiraniPonude(sifraPostupka, sifraPonude).subscribe();
   }
 
-  trackId(index: number, item: IUgovor): number {
-    return item.id!;
-  }
-
-  delete(ugovor: IUgovor): void {
-    const modalRef = this.modalService.open(UgovorDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
-    modalRef.componentInstance.ugovor = ugovor;
-    // unsubscribe not needed because closed completes on modal close
-    modalRef.closed.subscribe(reason => {
-      if (reason === 'deleted') {
-        this.loadPage();
-      }
+  printUgovor(broj: string): any {
+    this.ugovorService.printReportServiceUgovor(broj).subscribe((response: BlobPart) => {
+      const file = new Blob([response], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
     });
   }
 
-  protected sort(): string[] {
-    const result = [this.predicate + ',' + (this.ascending ? 'asc' : 'desc')];
-    if (this.predicate !== 'id') {
-      result.push('id');
-    }
-    return result;
-  }
-
-  protected handleNavigation(): void {
-    combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([data, params]) => {
-      const page = params.get('page');
-      const pageNumber = page !== null ? +page : 1;
-      const sort = (params.get('sort') ?? data['defaultSort']).split(',');
-      const predicate = sort[0];
-      const ascending = sort[1] === 'asc';
-      if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
-        this.predicate = predicate;
-        this.ascending = ascending;
-        this.loadPage(pageNumber, true);
-      }
+  printUgovorAnex(sifraPostupka: number, sifraPonude: number): any {
+    this.ugovorService.printReportAnexiUgovor(sifraPostupka, sifraPonude).subscribe((response: BlobPart) => {
+      const file = new Blob([response], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
     });
-  }
-
-  protected onSuccess(data: IUgovor[] | null, headers: HttpHeaders, page: number, navigate: boolean): void {
-    this.totalItems = Number(headers.get('X-Total-Count'));
-    this.page = page;
-    if (navigate) {
-      this.router.navigate(['/ugovor'], {
-        queryParams: {
-          page: this.page,
-          size: this.itemsPerPage,
-          sort: this.predicate + ',' + (this.ascending ? 'asc' : 'desc'),
-        },
-      });
-    }
-    this.ugovors = data ?? [];
-    this.ngbPaginationPage = this.page;
-  }
-
-  protected onError(): void {
-    this.ngbPaginationPage = this.page ?? 1;
   }
 }

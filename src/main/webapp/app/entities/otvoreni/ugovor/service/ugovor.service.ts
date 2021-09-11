@@ -1,62 +1,80 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import * as dayjs from 'dayjs';
-
 import { isPresent } from 'app/core/util/operators';
-import { DATE_FORMAT } from 'app/config/input.constants';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
-import { createRequestOption } from 'app/core/request/request-util';
 import { IUgovor, getUgovorIdentifier } from '../ugovor.model';
+import { getPonudeIdentifier, IPonude } from 'app/entities/otvoreni/ponude/ponude.model';
 
 export type EntityResponseType = HttpResponse<IUgovor>;
 export type EntityArrayResponseType = HttpResponse<IUgovor[]>;
 
 @Injectable({ providedIn: 'root' })
 export class UgovorService {
-  public resourceUrl = this.applicationConfigService.getEndpointFor('api/ugovors', 'otvoreni');
-
+  public resourceUrl = this.applicationConfigService.getEndpointFor('api/ugovors','otvoreni');
+  public resourceUrlSifraPostupka = this.applicationConfigService.getEndpointFor('api/ugovor','otvoreni');
+  public resourceUrlUgovorPdf = this.applicationConfigService.getEndpointFor('api/report/ugovor/','otvoreni');
+  public resourceUrlPdfPrvorangirani = this.applicationConfigService.getEndpointFor('api/report/prvorangirani','otvoreni');
+  public resourceUrlPostupakPonudeeUgovor = this.applicationConfigService.getEndpointFor('api/prvorangirani/ugovor','otvoreni');
+  // public resourceUrlPdfLocal1 = this.applicationConfigService.getEndpointFor('api/report/ugovor');
   constructor(protected http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
   create(ugovor: IUgovor): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ugovor);
-    return this.http
-      .post<IUgovor>(this.resourceUrl, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.post<IUgovor>(this.resourceUrl, ugovor, { observe: 'response' });
   }
 
   update(ugovor: IUgovor): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ugovor);
-    return this.http
-      .put<IUgovor>(`${this.resourceUrl}/${getUgovorIdentifier(ugovor) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
-  }
-
-  partialUpdate(ugovor: IUgovor): Observable<EntityResponseType> {
-    const copy = this.convertDateFromClient(ugovor);
-    return this.http
-      .patch<IUgovor>(`${this.resourceUrl}/${getUgovorIdentifier(ugovor) as number}`, copy, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.put<IUgovor>(`${this.resourceUrl}/${getPonudeIdentifier(ugovor) as number}`, ugovor, { observe: 'response' });
   }
 
   find(id: number): Observable<EntityResponseType> {
-    return this.http
-      .get<IUgovor>(`${this.resourceUrl}/${id}`, { observe: 'response' })
-      .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
+    return this.http.get<IUgovor>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
-
-  query(req?: any): Observable<EntityArrayResponseType> {
-    const options = createRequestOption(req);
-    return this.http
-      .get<IUgovor[]>(this.resourceUrl, { params: options, observe: 'response' })
-      .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
+  findSiftraPostupak(sifra_postupka: number): any {
+    return this.http.get<[IUgovor]>(`${this.resourceUrlSifraPostupka}/${sifra_postupka}`);
+  }
+  query(): Observable<EntityArrayResponseType> {
+    return this.http.get<IUgovor[]>(this.resourceUrl, { observe: 'response' });
   }
 
   delete(id: number): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
+  ponudjaciAll(): any {
+    return this.http.get<IPonude[]>(this.resourceUrl);
+  }
+  getPrvorangiraniPonude(sifra_postupka: number, sifra_ponude: number): Observable<IPonude[]> {
+    const params = new HttpParams();
+    params.set('sifra_postupka', String(sifra_postupka));
+    params.set('sifra_ponude', String(sifra_ponude));
 
+    return this.http.get<IPonude[]>(
+      `${this.resourceUrlPostupakPonudeeUgovor}?sifra_postupka=${sifra_postupka}&sifra_ponude=${sifra_ponude}`,
+      {
+        params,
+      }
+    );
+  }
+  printReportAnexiUgovor(sifra_postupka: number, sifra_ponude: number): any {
+    const params = new HttpParams();
+    params.set('sifra_postupka', String(sifra_postupka));
+    params.set('sifra_ponude', String(sifra_ponude));
+
+    return this.http.get<IPonude[]>(`${this.resourceUrlPdfPrvorangirani}?sifra_postupka=${sifra_postupka}&sifra_ponude=${sifra_ponude}`, {
+      params,
+      responseType: 'arraybuffer' as 'json',
+    });
+  }
+  printReportServiceUgovor(brojUgovora: string): any {
+    // const httpOptions = {
+    //   responseType: 'arraybuffer' as 'json'
+    //   // 'responseType'  : 'blob' as 'json'        //This also worked
+    // };
+    return this.http.get<[IUgovor]>(this.resourceUrlUgovorPdf + brojUgovora, {
+      responseType: 'arraybuffer' as 'json',
+      // 'responseType'  : 'blob' as 'json'        //This also worked
+    });
+  }
   addUgovorToCollectionIfMissing(ugovorCollection: IUgovor[], ...ugovorsToCheck: (IUgovor | null | undefined)[]): IUgovor[] {
     const ugovors: IUgovor[] = ugovorsToCheck.filter(isPresent);
     if (ugovors.length > 0) {
@@ -72,30 +90,5 @@ export class UgovorService {
       return [...ugovorsToAdd, ...ugovorCollection];
     }
     return ugovorCollection;
-  }
-
-  protected convertDateFromClient(ugovor: IUgovor): IUgovor {
-    return Object.assign({}, ugovor, {
-      datumUgovora: ugovor.datumUgovora?.isValid() ? ugovor.datumUgovora.format(DATE_FORMAT) : undefined,
-      datumOdluke: ugovor.datumOdluke?.isValid() ? ugovor.datumOdluke.format(DATE_FORMAT) : undefined,
-    });
-  }
-
-  protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
-    if (res.body) {
-      res.body.datumUgovora = res.body.datumUgovora ? dayjs(res.body.datumUgovora) : undefined;
-      res.body.datumOdluke = res.body.datumOdluke ? dayjs(res.body.datumOdluke) : undefined;
-    }
-    return res;
-  }
-
-  protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
-    if (res.body) {
-      res.body.forEach((ugovor: IUgovor) => {
-        ugovor.datumUgovora = ugovor.datumUgovora ? dayjs(ugovor.datumUgovora) : undefined;
-        ugovor.datumOdluke = ugovor.datumOdluke ? dayjs(ugovor.datumOdluke) : undefined;
-      });
-    }
-    return res;
   }
 }

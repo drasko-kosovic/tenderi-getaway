@@ -1,4 +1,5 @@
 import * as dayjs from 'dayjs';
+import {IUgovor} from "app/entities/otvoreni/ugovor/ugovor.model";
 
 export interface IPonude {
   id?: number;
@@ -32,6 +33,6 @@ export class Ponude implements IPonude {
   }
 }
 
-export function getPonudeIdentifier(ponude: IPonude): number | undefined {
+export function getPonudeIdentifier(ponude: IUgovor): number | undefined {
   return ponude.id;
 }
