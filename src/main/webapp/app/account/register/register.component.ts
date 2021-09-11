@@ -9,6 +9,7 @@ import { RegisterService } from './register.service';
 @Component({
   selector: 'jhi-register',
   templateUrl: './register.component.html',
+  styleUrls: ['./register.scss'],
 })
 export class RegisterComponent implements AfterViewInit {
   @ViewChild('login', { static: false })
@@ -61,7 +62,9 @@ export class RegisterComponent implements AfterViewInit {
       );
     }
   }
-
+  previousState(): void {
+    window.history.back();
+  }
   private processError(response: HttpErrorResponse): void {
     if (response.status === 400 && response.error.type === LOGIN_ALREADY_USED_TYPE) {
       this.errorUserExists = true;
