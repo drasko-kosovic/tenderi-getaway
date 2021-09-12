@@ -45,6 +45,7 @@
     "entities": ["Ponude", "Postupci", "Ponudjaci", "Narucilac", "Ugovor", "Specifikacije", "Anex", "ViewPonude"],
     "herokuAppName": "tenderi-micro-getaway",
     "herokuDeployType": "git",
-    "herokuJavaVersion": "11"
+    "herokuJavaVersion": "11",
+    "appFolder": "tenderi-getaway"
   }
 }
